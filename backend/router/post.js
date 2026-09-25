@@ -9,27 +9,38 @@ const User = require('../models/user');
 const authMidlleware = require('../middleware/authMiddleware');
 
 router.post("/", authMidlleware, postUpload.array("media", 10), async(req, res) => {
-  if(!req.files || req.files.length === 0) {
-    return res.status(400).json({message: "Atleast one media file required"})
-  }
-  const {caption, tags, location} = req.body;
-  const media = req.files.map(file => {
-    return {
-      name: file.filename,
-      mediaType: file.mimetype.startsWith("image") ? "image" : "video"
+
+  try {
+    if(!req.files || req.files.length === 0) {
+      return res.status(400).json({message: "Atleast one media file required"})
     }
+    const {caption, tags, location} = req.body;
+    const media = req.files.map(file => {
+      return {
+        name: file.filename,
+        mediaType: file.mimetype.startsWith("image") ? "image" : "video"
+      }
+    });
+  
+    const newPost = new Post({
+      user: req.user._id,
+      captions: caption,
+      tags,
+      location,
+      media
+    })
+    await newPost.save()
+  
+    return res.status(201).json({message: "New post Created", post: newPost});
+    
+  } catch (error) {
+    console.error("Error creating post:", error);
+
+  return res.status(500).json({
+    message: "Post creation failed",
+    error: error.message
   });
-
-  const newPost = new Post({
-    user: req.user._id,
-    captions: caption,
-    tags,
-    location,
-    media
-  })
-  await newPost.save()
-
-  return res.status(201).json({message: "New post Created", post: newPost});
+  }
 });
 
 router.get("/myposts", authMidlleware, async(req, res) =>{
