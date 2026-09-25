@@ -11,7 +11,7 @@ import MainLayout from "../components/MainLayout";
 import ChatBox from "../components/ChatBox";
 import api from "../lib/api";
 
-const SOCKET_URL = "https://pista-gram-new-1.onrender.com";
+const SOCKET_URL = "https://pista-gram-new.onrender.com";
 
 /*
   Messages page flow:
