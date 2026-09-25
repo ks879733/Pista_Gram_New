@@ -20,7 +20,7 @@ const server = http.createServer(app);
 // The existing socket event names and message logic are kept unchanged.
 const io = new Server(server, {
   cors: {
-    origin: "https://pista-gram-new.onrender.com",
+    origin: "https://pista-gram-new-1.onrender.com",
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -31,7 +31,7 @@ mongoose.connect(process.env.MONGO_DB_URI)
   .catch((err) => console.log("Database connection failed", err));
 
 app.use(cors({
-  origin: "https://pista-gram-new.onrender.com",
+  origin: "https://pista-gram-new-1.onrender.com",
   credentials: true,
 }));
 app.use(express.json());
