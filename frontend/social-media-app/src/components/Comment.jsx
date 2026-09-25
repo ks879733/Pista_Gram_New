@@ -15,9 +15,7 @@ const Comment = ({ postId }) => {
 
   const [error, setError] = useState("");
 
-  // --------------------------------
-  // LOAD COMMENTS
-  // --------------------------------
+  
   const loadComments = async () => {
     try {
       setLoading(true);
@@ -76,9 +74,7 @@ const Comment = ({ postId }) => {
     }
   };
 
-  // --------------------------------
-  // ADD REPLY
-  // --------------------------------
+ 
   const addReply = async (commentId) => {
     const value = replyText[commentId]?.trim();
 
@@ -90,13 +86,6 @@ const Comment = ({ postId }) => {
       setReplyLoading(commentId);
       setError("");
 
-      /*
-        Backend reply API expects:
-
-        {
-          text: "reply"
-        }
-      */
 
       await api.post(`/posts/${postId}/comments/${commentId}/replies`, {
         text: value,
