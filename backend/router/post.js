@@ -355,6 +355,53 @@ router.delete("/:postId/comments/:commentId/", authMidlleware, async (req, res) 
   });
 });
 
+
+router.patch("/profile", authMidlleware, async (req, res) => {
+
+  try {
+    const userId = req.user._id;
+    const { username, profileName, bio } = req.body;
+
+    if(!username && !profileName && !bio) {
+      return res.status(400).json({
+       message: "Please provide username, profileName or bio to update"
+     })
+   }
+   
+   const updatedData = {};
+   if(username !== undefined) {
+    updatedData.username = username
+   }
+   if(profileName !== undefined) {
+    updatedData.profileName = profileName
+   }
+   if(bio !== undefined) {
+    updatedData.bio = bio
+   }
+
+   const user = await User.findByIdAndUpdate(userId, { $set: updatedData }, { new: true, runValidators: true });
+
+   if(!user) {
+    return res.status(404).json({message: "User not found"})
+   }
+
+   res.status(200).json({
+    message: "Profile updated successfully",
+    user: {
+      _id: user._id,
+      username: user.username,
+      profileName: user.profileName,
+      bio: user.bio
+    }
+   });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+})
 router.get("/:postId/comments/reply", authMidlleware, async (req, res) => {
   const postId = req.params.postId;
   const post = await Post.findById(postId).select("comments")
@@ -364,6 +411,7 @@ router.get("/:postId/comments/reply", authMidlleware, async (req, res) => {
   res.json({
     reply: post.comments.reply
   })
-})
+});
+
 
 module.exports = router;

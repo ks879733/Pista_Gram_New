@@ -17,6 +17,12 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [listType, setListType] = useState(null);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editUsername, setEditUsername] = useState("");
+  const [editProfileName, setEditProfileName] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
+
   const loadProfile = async () => {
     setLoading(true);
     setError("");
@@ -89,6 +95,33 @@ const Profile = () => {
     }
   };
 
+  const handleUpdateProfile = async () => {
+    try {
+      setEditLoading(true);
+      const response = await api.patch("/posts/profile", {
+        username: editUsername,
+        profileName: editProfileName,
+        bio: editBio,
+      });
+
+      console.log(response.data);
+      setProfile((prev) => ({
+        ...prev,
+        ...response.data.user,
+      }));
+      setMe((prev) => ({
+        ...prev,
+        ...response.data.user,
+      }));
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error(error);
+      setError(error.response?.data?.message || "Unable to update profile");
+    } finally {
+      setEditLoading(false);
+    }
+  };
   const deletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
 
@@ -103,7 +136,9 @@ const Profile = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="mx-auto max-w-4xl p-8 text-center text-slate-400">Loading profile...</div>
+        <div className="mx-auto max-w-4xl p-8 text-center text-slate-400">
+          Loading profile...
+        </div>
       </MainLayout>
     );
   }
@@ -116,7 +151,12 @@ const Profile = () => {
             <Users className="mx-auto h-10 w-10 text-amber-500" />
             <h1 className="mt-4 text-2xl font-black">Profile not available</h1>
             <p className="mt-2 text-slate-600">{error}</p>
-            <Link to="/home" className="mt-5 inline-block rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white">Back to Home</Link>
+            <Link
+              to="/home"
+              className="mt-5 inline-block rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white"
+            >
+              Back to Home
+            </Link>
           </div>
         </div>
       </MainLayout>
@@ -137,33 +177,84 @@ const Profile = () => {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-3xl font-black">@{profile.username}</h1>
-                {profile.isVerified && <span className="rounded-full bg-blue-50 px-2 py-1 text-sm font-bold text-blue-500">✓ Verified</span>}
+                {profile.isVerified && (
+                  <span className="rounded-full bg-blue-50 px-2 py-1 text-sm font-bold text-blue-500">
+                    ✓ Verified
+                  </span>
+                )}
 
                 {isOwnProfile ? (
-                  <button disabled className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-400">
-                    <Settings className="mr-2 inline h-4 w-4" /> Edit
+                  <button
+                    onClick={() => {
+                      setEditUsername(profile.username || "");
+                      setEditProfileName(profile.profileName || "");
+                      setEditBio(profile.bio || "");
+                      setIsEditing(true);
+                    }}
+                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    <Settings className="mr-2 inline h-4 w-4" />
+                    Edit
                   </button>
                 ) : followStatus === "following" ? (
-                  <button onClick={handleUnfollow} disabled={followLoading} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
-                    {followLoading ? <Loader2 className="inline h-4 w-4 animate-spin" /> : <><UserCheck className="mr-2 inline h-4 w-4" />Following</>}
+                  <button
+                    onClick={handleUnfollow}
+                    disabled={followLoading}
+                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700"
+                  >
+                    {followLoading ? (
+                      <Loader2 className="inline h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <UserCheck className="mr-2 inline h-4 w-4" />
+                        Following
+                      </>
+                    )}
                   </button>
                 ) : (
-                  <button onClick={handleFollow} disabled={followLoading || followStatus === "requested"} className="rounded-xl bg-pink-500 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-200 disabled:text-slate-500">
-                    {followLoading ? <Loader2 className="inline h-4 w-4 animate-spin" /> : followStatus === "requested" ? "Requested" : <><UserPlus className="mr-2 inline h-4 w-4" />Follow</>}
+                  <button
+                    onClick={handleFollow}
+                    disabled={followLoading || followStatus === "requested"}
+                    className="rounded-xl bg-pink-500 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-200 disabled:text-slate-500"
+                  >
+                    {followLoading ? (
+                      <Loader2 className="inline h-4 w-4 animate-spin" />
+                    ) : followStatus === "requested" ? (
+                      "Requested"
+                    ) : (
+                      <>
+                        <UserPlus className="mr-2 inline h-4 w-4" />
+                        Follow
+                      </>
+                    )}
                   </button>
                 )}
               </div>
 
-              <p className="mt-2 text-slate-500">{profile.profileName || "PistaGram user"}</p>
-              <p className="mt-3 max-w-xl text-slate-600">{profile.bio || "No bio yet."}</p>
-              <p className="mt-2 break-all text-xs text-slate-400">User ID: {profile._id}</p>
+              <p className="mt-2 text-slate-500">
+                {profile.profileName || "PistaGram user"}
+              </p>
+              <p className="mt-3 max-w-xl text-slate-600">
+                {profile.bio || "No bio yet."}
+              </p>
+              <p className="mt-2 break-all text-xs text-slate-400">
+                User ID: {profile._id}
+              </p>
 
               <div className="mt-5 flex flex-wrap gap-3 text-sm">
-                <span className="rounded-xl bg-slate-50 px-4 py-2"><b>{isOwnProfile ? posts.length : "—"}</b> posts</span>
-                <button onClick={() => setListType("followers")} className="rounded-xl bg-slate-50 px-4 py-2 hover:bg-slate-100">
+                <span className="rounded-xl bg-slate-50 px-4 py-2">
+                  <b>{isOwnProfile ? posts.length : "—"}</b> posts
+                </span>
+                <button
+                  onClick={() => setListType("followers")}
+                  className="rounded-xl bg-slate-50 px-4 py-2 hover:bg-slate-100"
+                >
                   <b>{profile.followers?.length || 0}</b> followers
                 </button>
-                <button onClick={() => setListType("following")} className="rounded-xl bg-slate-50 px-4 py-2 hover:bg-slate-100">
+                <button
+                  onClick={() => setListType("following")}
+                  className="rounded-xl bg-slate-50 px-4 py-2 hover:bg-slate-100"
+                >
                   <b>{profile.following?.length || 0}</b> following
                 </button>
               </div>
@@ -171,31 +262,140 @@ const Profile = () => {
           </div>
         </div>
 
-        {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-600">{error}</p>}
+        {/* // yaha se  naya page for editing */}
+        {isEditing && (
+          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-black">Edit Profile</h2>
+
+              <button
+                onClick={() => setIsEditing(false)}
+                disabled={editLoading}
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {/* Username */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Username
+                </label>
+
+                <input
+                  type="text"
+                  value={editUsername}
+                  onChange={(e) => setEditUsername(e.target.value)}
+                  placeholder="Username"
+                  disabled={editLoading}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-pink-500"
+                />
+              </div>
+
+              {/* Profile Name */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Profile Name
+                </label>
+
+                <input
+                  type="text"
+                  value={editProfileName}
+                  onChange={(e) => setEditProfileName(e.target.value)}
+                  placeholder="Profile Name"
+                  disabled={editLoading}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-pink-500"
+                />
+              </div>
+
+              {/* Bio */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Bio
+                </label>
+
+                <textarea
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  placeholder="Write something about yourself..."
+                  rows={4}
+                  disabled={editLoading}
+                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-pink-500"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  onClick={handleUpdateProfile}
+                  disabled={editLoading}
+                  className="w-full rounded-xl bg-pink-500 px-6 py-3 font-semibold text-white hover:bg-pink-600 disabled:opacity-50 sm:w-auto"
+                >
+                  {editLoading ? "Saving..." : "Save Changes"}
+                </button>
+
+                <button
+                  onClick={() => setIsEditing(false)}
+                  disabled={editLoading}
+                  className="w-full rounded-xl bg-slate-100 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-200 disabled:opacity-50 sm:w-auto"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {error && (
+          <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
         {isOwnProfile && (
           <div className="mt-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-black">My Posts</h2>
-              <Link to="/create-post" className="rounded-xl bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600">Create Post</Link>
+              <Link
+                to="/create-post"
+                className="rounded-xl bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600"
+              >
+                Create Post
+              </Link>
             </div>
 
             <div className="space-y-6">
-              {posts.map((post) => <PostCard key={post._id} post={post} currentUser={me} onDelete={deletePost} />)}
-              {!posts.length && <div className="rounded-3xl bg-white p-10 text-center text-slate-400">You have not created a post yet.</div>}
+              {posts.map((post) => (
+                <PostCard
+                  key={post._id}
+                  post={post}
+                  currentUser={me}
+                  onDelete={deletePost}
+                />
+              ))}
+              {!posts.length && (
+                <div className="rounded-3xl bg-white p-10 text-center text-slate-400">
+                  You have not created a post yet.
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {!isOwnProfile && (
           <div className="mt-6 rounded-3xl bg-white p-8 text-center text-slate-400">
-            This user's profile is available. Their posts are not shown because the current backend does not expose another-user post endpoint.
+            This user's profile is available. Their posts are not shown because
+            the current backend does not expose another-user post endpoint.
           </div>
         )}
       </div>
 
       {listType && (
-        <FollowersFollowingModal type={listType} onClose={() => setListType(null)} />
+        <FollowersFollowingModal
+          type={listType}
+          onClose={() => setListType(null)}
+        />
       )}
     </MainLayout>
   );
