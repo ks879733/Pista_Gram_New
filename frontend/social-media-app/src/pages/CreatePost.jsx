@@ -101,7 +101,7 @@ const CreatePost = () => {
               <input
                 type="file"
                 multiple
-                accept="image/jpeg,image/jpg,image/png,image/gif,video/mp4,video/mov"
+                accept="image/jpeg,image/jpg,image/png,image/gif,video/mp4,video/quicktime"
                 onChange={chooseFiles}
                 className="hidden"
               />

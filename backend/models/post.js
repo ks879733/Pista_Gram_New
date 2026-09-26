@@ -1,32 +1,102 @@
 const mongoose = require('mongoose');
+
 const commentSchema = new mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
-  text: {type: String, required: true},
-  createdAt: {type:Date, default: Date.now()},
+
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+
+  text: {
+    type: String,
+    required: true
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+
   replies: [
     {
-      user: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
-      text: {type: String, required: true},
-      createdAt: {type:Date, default: Date.now()},
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+      },
+
+      text: {
+        type: String,
+        required: true
+      },
+
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
     }
   ]
-})
+
+});
+
+
 const postSchema = new mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+
+  // Cloudinary media
   media: [
     {
-      name: {type: String, required: true},
-      mediaType: {type: String, enum: ["image", "video"], required: true}
+      url: {
+        type: String,
+        required: true
+      },
+
+      publicId: {
+        type: String,
+        required: true
+      },
+
+      mediaType: {
+        type: String,
+        enum: ["image", "video"],
+        required: true
+      }
     }
   ],
-  captions: {type: String},
-  like: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-  tags: [{type: String}],
-  location: {type: String},
+
+  captions: {
+    type: String
+  },
+
+  like: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  ],
+
+  tags: [
+    {
+      type: String
+    }
+  ],
+
+  location: {
+    type: String
+  },
+
   comments: [commentSchema],
+
 }, {
   timestamps: true
 });
+
 
 const Post = mongoose.model("Post", postSchema);
 

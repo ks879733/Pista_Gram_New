@@ -2,46 +2,94 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const postUpload = require('../config/multer-upload');
-const path = require('path');
-const fs = require('fs/promises');
+const cloudinary = require("../config/cloudinary");
 const Post = require('../models/post');
 const User = require('../models/user');
 const authMidlleware = require('../middleware/authMiddleware');
 
-router.post("/", authMidlleware, postUpload.array("media", 10), async(req, res) => {
+router.post(
+  "/",
+  authMidlleware,
+  postUpload.array("media", 10),
+  async (req, res) => {
 
-  try {
-    if(!req.files || req.files.length === 0) {
-      return res.status(400).json({message: "Atleast one media file required"})
-    }
-    const {caption, tags, location} = req.body;
-    const media = req.files.map(file => {
-      return {
-        name: file.filename,
-        mediaType: file.mimetype.startsWith("image") ? "image" : "video"
+    try {
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          message: "Atleast one media file required"
+        });
       }
-    });
-  
-    const newPost = new Post({
-      user: req.user._id,
-      captions: caption,
-      tags,
-      location,
-      media
-    })
-    await newPost.save()
-  
-    return res.status(201).json({message: "New post Created", post: newPost});
-    
-  } catch (error) {
-    console.error("Error creating post:", error);
 
-  return res.status(500).json({
-    message: "Post creation failed",
-    error: error.message
-  });
+      const { caption, tags, location } = req.body;
+
+      // Upload media files to Cloudinary
+      const media = await Promise.all(
+        req.files.map((file) => {
+
+          return new Promise((resolve, reject) => {
+
+            const resourceType = file.mimetype.startsWith("video")
+              ? "video"
+              : "image";
+
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "pista-gram/posts",
+                resource_type: resourceType
+              },
+
+              (error, result) => {
+
+                if (error) {
+                  reject(error);
+                  return;
+                }
+
+                resolve({
+                  url: result.secure_url,
+                  publicId: result.public_id,
+                  mediaType: resourceType
+                });
+
+              }
+            );
+
+            uploadStream.end(file.buffer);
+
+          });
+
+        })
+      );
+
+      // Create new post
+      const newPost = new Post({
+        user: req.user._id,
+        captions: caption,
+        tags,
+        location,
+        media
+      });
+
+      await newPost.save();
+
+      return res.status(201).json({
+        message: "New post Created",
+        post: newPost
+      });
+
+    } catch (error) {
+
+      console.error("Error creating post:", error);
+
+      return res.status(500).json({
+        message: "Post creation failed",
+        error: error.message
+      });
+
+    }
   }
-});
+);
 
 router.get("/myposts", authMidlleware, async(req, res) =>{
   const page = parseInt(req.query.page) || 1
@@ -95,27 +143,68 @@ router.get("/followers", authMidlleware, async (req, res) => {
 });
 
 router.delete("/:postId", authMidlleware, async (req, res) => {
-  const postId = req.params.postId;
-  const userId = req.user._id;
-  const post = await Post.findById(postId);
-  if(!post) return res.status(404).json({message: "Post not found"});
 
-  if(post.user.toString() !== userId.toString()) {
-    return res.status(403).json({mesaage: "Unauthorized to delete this"})
-  }
-  post.media.forEach(async (file) => {
-    const filePath = path.join(__dirname, "../uploads/posts", file.name);
+  try {
 
-    try {
-      await fs.unlink(filePath)
-    } catch (error) {
-      console.log(`Error in deleting file ${filePath}`, error);
+    const postId = req.params.postId;
+    const userId = req.user._id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found"
+      });
     }
-  });
 
-  await post.deleteOne();
+    
+    if (post.user.toString() !== userId.toString()) {
+      return res.status(403).json({
+        message: "Unauthorized to delete this"
+      });
+    }
 
-  res.json({message: "Post deleted successsfully!"});
+    
+    for (const file of post.media) {
+
+      try {
+
+        await cloudinary.uploader.destroy(
+          file.publicId,
+          {
+            resource_type: file.mediaType === "video"
+              ? "video"
+              : "image"
+          }
+        );
+
+      } catch (error) {
+
+        console.log(
+          `Error deleting Cloudinary file ${file.publicId}:`,
+          error
+        );
+
+      }
+    }
+
+    
+    await post.deleteOne();
+
+    return res.json({
+      message: "Post deleted successfully!"
+    });
+
+  } catch (error) {
+
+    console.error("Error deleting post:", error);
+
+    return res.status(500).json({
+      message: "Post deletion failed",
+      error: error.message
+    });
+
+  }
 
 });
 
