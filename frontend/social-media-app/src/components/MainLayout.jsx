@@ -5,7 +5,7 @@ const MainLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <Nav />
-      <main className="pb-0 md:pb-0 pb-20">{children}</main>
+      <main className="pt-16 pb-20 md:pb-0">{children}</main>
     </div>
   );
 };

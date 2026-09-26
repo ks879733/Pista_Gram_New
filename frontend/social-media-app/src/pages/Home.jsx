@@ -58,8 +58,8 @@ const Home = () => {
 
   return (
     <MainLayout>
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section>
+      <div className="mx-auto grid w-full max-w-7xl items-start gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="min-w-0">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-pink-500">Welcome back</p>
@@ -94,7 +94,7 @@ const Home = () => {
           </div>
         </section>
 
-        <aside className="hidden lg:block">
+        <aside className="hidden lg:block lg:min-w-0">
           <div className="sticky top-24 space-y-5">
             <div className="rounded-3xl border border-slate-200 bg-white p-5">
               <div className="flex items-center gap-3">

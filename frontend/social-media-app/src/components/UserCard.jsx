@@ -52,14 +52,14 @@ const UserCard = ({ user, onStatusChange }) => {
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <div className="flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Link to={`/profile/${user._id}`} className="min-w-0 flex-1">
         <div className="flex items-center gap-3">
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 text-lg font-bold text-white">
             {(user.username || "U")[0].toUpperCase()}
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1 overflow-hidden">
             <div className="flex items-center gap-1">
               <p className="truncate font-bold text-slate-900">@{user.username}</p>
               {user.isVerified && <span className="text-blue-500">✓</span>}
@@ -68,7 +68,7 @@ const UserCard = ({ user, onStatusChange }) => {
               {user.profileName || "PistaGram user"}
             </p>
             {user.bio && (
-              <p className="mt-1 truncate text-xs text-slate-400">{user.bio}</p>
+              <p className="mt-1 break-words text-xs text-slate-400">{user.bio}</p>
             )}
           </div>
         </div>

@@ -139,7 +139,7 @@ router.post("/logout", async (req, res) => {
   res.json({message: "LogedOut Successfully"});
 });
 
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/", authMidlleware, async (req, res) => {
   const user = await User.findById(req.user._id).select("-password");
 
   if(!user) {
@@ -148,33 +148,33 @@ router.get("/", authMiddleware, async (req, res) => {
   res.json(user);
 });
 
-// router.get("/users", authMiddleware, async (req, res) => {
-//   try {
-//     const users = await User.find({ _id: { $ne: req.user._id } })
-//       .select("_id username profileName bio isVerified isPrivate followers following followRequest")
-//       .sort({ username: 1 });
+router.get("/users", authMidlleware, async (req, res) => {
+  try {
+    const users = await User.find({ _id: { $ne: req.user._id } })
+      .select("_id username profileName bio isVerified isPrivate followers following followRequest")
+      .sort({ username: 1 });
 
-//     const suggestions = users.map((user) => {
-//       const currentUserId = req.user._id.toString();
-//       const isFollowing = user.followers.some((id) => id.toString() === currentUserId);
-//       const isRequested = user.followRequest.some((id) => id.toString() === currentUserId);
+    const suggestions = users.map((user) => {
+      const currentUserId = req.user._id.toString();
+      const isFollowing = user.followers.some((id) => id.toString() === currentUserId);
+      const isRequested = user.followRequest.some((id) => id.toString() === currentUserId);
 
-//       return {
-//         _id: user._id,
-//         username: user.username,
-//         profileName: user.profileName,
-//         bio: user.bio,
-//         isVerified: user.isVerified,
-//         isPrivate: user.isPrivate,
-//         followStatus: isFollowing ? "following" : isRequested ? "requested" : "follow"
-//       };
-//     });
+      return {
+        _id: user._id,
+        username: user.username,
+        profileName: user.profileName,
+        bio: user.bio,
+        isVerified: user.isVerified,
+        isPrivate: user.isPrivate,
+        followStatus: isFollowing ? "following" : isRequested ? "requested" : "follow"
+      };
+    });
 
-//     res.json(suggestions);
-//   } catch (error) {
-//     res.status(500).json({ message: "Unable to load user suggestions" });
-//   }
-// });
+    res.json(suggestions);
+  } catch (error) {
+    res.status(500).json({ message: "Unable to load user suggestions" });
+  }
+});
 
 router.post("/request-reset-password", async (req, res) => {
   const {email} = req.body;
@@ -234,7 +234,7 @@ await user.save();
 res.json({message: "Pasword reset successfully"});
 });
 
-router.post("/:userId/follow", authMiddleware, async (req, res) => {
+router.post("/:userId/follow", authMidlleware, async (req, res) => {
   const userId = req.params.userId;
   const currentUserId = req.user._id
 
@@ -279,7 +279,7 @@ router.post("/:userId/follow", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/rejected-request/:requesterId", authMiddleware, async (req, res) => {
+router.post("/rejected-request/:requesterId", authMidlleware, async (req, res) => {
   const requesterId = req.params.requesterId;
   const currentUserId = req.user._id;
   if(requesterId === currentUserId.toString() ){
@@ -304,7 +304,7 @@ router.post("/rejected-request/:requesterId", authMiddleware, async (req, res) =
 
 })
 
-router.post("/accepted-request/:requesterId", authMiddleware, async (req, res) => {
+router.post("/accepted-request/:requesterId", authMidlleware, async (req, res) => {
   const requesterId = req.params.requesterId;
   const currentUserId = req.user._id;
   if(requesterId === currentUserId.toString() ){
@@ -332,7 +332,29 @@ router.post("/accepted-request/:requesterId", authMiddleware, async (req, res) =
 
 });
 
-router.get("/:userId/followers", authMiddleware, async (req, res) => {
+router.get("/follow-requests", authMidlleware, async (req, res) => {
+
+  try {
+    const currentUserId = req.user._id;
+  const currentUser = await User.findById(currentUserId).populate("followRequest", "_id username profileName accountStatus isVerified");
+
+  if(!currentUser) {
+    return res.status(404).json({message: "User not found"});
+  }
+
+  res.status(200).json({
+      requests: currentUser.followRequest
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+  
+})
+router.get("/:userId/followers", authMidlleware, async (req, res) => {
   const userId = req.params.userId;
   const currentUserId = req.user._id;
 
@@ -353,7 +375,7 @@ router.get("/:userId/followers", authMiddleware, async (req, res) => {
 
 });
 
-router.get("/:userId/following", authMiddleware, async (req, res) => {
+router.get("/:userId/following", authMidlleware, async (req, res) => {
   const userId = req.params.userId;
   const currentUserId = req.user._id;
   const user = await User.findById(userId).populate("following", "_id username accountStatus isVerified");
@@ -396,7 +418,7 @@ router.post("/:userId/unfollow", authMidlleware, async (req, res) => {
 
 })
 
-router.get("/user/:userId", authMiddleware, async (req, res) => {
+router.get("/user/:userId", authMidlleware, async (req, res) => {
   const targetUserId = req.params.userId;
   const currentUserId = req.user._id;
   const user = await User.findById(targetUserId)
@@ -424,7 +446,7 @@ router.get("/user/:userId", authMiddleware, async (req, res) => {
   });
 });
 
-router.get("/users", authMiddleware, async (req, res) => {
+router.get("/users", authMidlleware, async (req, res) => {
 
   const currentUserId = req.user._id;
 
@@ -435,7 +457,7 @@ router.get("/users", authMiddleware, async (req, res) => {
   res.json(users);
 });
 
-router.get("/followers", authMiddleware, async (req, res) => {
+router.get("/followers", authMidlleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate("followers", "_id username profileName accountStatus isVerified");
   
@@ -453,7 +475,7 @@ router.get("/followers", authMiddleware, async (req, res) => {
   }
 
 })
-router.get("/following", authMiddleware, async (req, res) => {
+router.get("/following", authMidlleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate("following", "_id username profileName accountStatus isVerified ");
   

@@ -228,20 +228,20 @@ const Comment = ({ postId }) => {
                     {/* REPLIES */}
 
                     {repliesOpen && (
-                      <div className="mt-3 border-l-2 border-pink-100 pl-3">
+                      <div className="mt-3 w-full min-w-0">
                         {/* EXISTING REPLIES */}
 
                         <div className="space-y-2">
                           {replies.map((reply) => (
                             <div
                               key={reply._id}
-                              className="rounded-xl bg-white p-2.5"
+                              className="w-full min-w-0 rounded-xl bg-white p-2.5"
                             >
                               <p className="text-xs font-bold text-slate-900">
                                 @{reply.user?.username || "user"}
                               </p>
 
-                              <p className="mt-1 text-xs text-slate-600">
+                              <p className="mt-1 break-words text-xs text-slate-600">
                                 {reply.text}
                               </p>
                             </div>

@@ -5,6 +5,7 @@ import {
   Compass,
   PlusSquare,
   MessageCircle,
+  Heart,
   User,
   LogOut,
   Menu,
@@ -41,7 +42,7 @@ const Nav = () => {
   return (
     <>
       {/* Desktop / tablet top navigation */}
-      <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link
             to="/home"
@@ -83,6 +84,13 @@ const Nav = () => {
             >
               <User className="mr-2 inline h-5 w-5" /> Profile
             </Link>
+            <Link
+              to="/notifications"
+              className="rounded-xl px-4 py-2 text-slate-700 hover:bg-pink-50 hover:text-pink-600"
+              aria-label="Notifications"
+            >
+              <Heart className="h-5 w-5" />
+            </Link>
             <button
               onClick={logout}
               className="ml-2 rounded-xl px-4 py-2 text-slate-500 hover:bg-slate-100"
@@ -110,26 +118,52 @@ const Nav = () => {
         {open && (
           <div className="border-t border-slate-100 bg-white px-4 pb-4 md:hidden">
             <div className="mx-auto max-w-7xl space-y-1 pt-3">
-              <Link onClick={closeMenu} to="/home" className="block rounded-xl px-4 py-3 hover:bg-pink-50">
-                <Home className="mr-3 inline h-5 w-5" />Home
+              <Link
+                onClick={closeMenu}
+                to="/home"
+                className="block rounded-xl px-4 py-3 hover:bg-pink-50"
+              >
+                <Home className="mr-3 inline h-5 w-5" />
+                Home
               </Link>
-              <Link onClick={closeMenu} to="/explore" className="block rounded-xl px-4 py-3 hover:bg-pink-50">
-                <Compass className="mr-3 inline h-5 w-5" />Explore
+              <Link
+                onClick={closeMenu}
+                to="/explore"
+                className="block rounded-xl px-4 py-3 hover:bg-pink-50"
+              >
+                <Compass className="mr-3 inline h-5 w-5" />
+                Explore
               </Link>
-              <Link onClick={closeMenu} to="/create-post" className="block rounded-xl px-4 py-3 hover:bg-pink-50">
-                <PlusSquare className="mr-3 inline h-5 w-5" />Create Post
+              <Link
+                onClick={closeMenu}
+                to="/create-post"
+                className="block rounded-xl px-4 py-3 hover:bg-pink-50"
+              >
+                <PlusSquare className="mr-3 inline h-5 w-5" />
+                Create Post
               </Link>
-              <Link onClick={closeMenu} to="/messages" className="block rounded-xl px-4 py-3 hover:bg-pink-50">
-                <MessageCircle className="mr-3 inline h-5 w-5" />Messages
+              <Link
+                onClick={closeMenu}
+                to="/messages"
+                className="block rounded-xl px-4 py-3 hover:bg-pink-50"
+              >
+                <MessageCircle className="mr-3 inline h-5 w-5" />
+                Messages
               </Link>
-              <Link onClick={closeMenu} to="/profile" className="block rounded-xl px-4 py-3 hover:bg-pink-50">
-                <User className="mr-3 inline h-5 w-5" />Profile
+              <Link
+                onClick={closeMenu}
+                to="/profile"
+                className="block rounded-xl px-4 py-3 hover:bg-pink-50"
+              >
+                <User className="mr-3 inline h-5 w-5" />
+                Profile
               </Link>
               <button
                 onClick={logout}
                 className="block w-full rounded-xl px-4 py-3 text-left text-red-600 hover:bg-red-50"
               >
-                <LogOut className="mr-3 inline h-5 w-5" />Logout
+                <LogOut className="mr-3 inline h-5 w-5" />
+                Logout
               </button>
             </div>
           </div>
