@@ -79,18 +79,19 @@ const Nav = () => {
               <MessageCircle className="mr-2 inline h-5 w-5" /> Messages
             </Link>
             <Link
-              to="/profile"
-              className="rounded-xl px-4 py-2 text-slate-700 hover:bg-pink-50 hover:text-pink-600"
-            >
-              <User className="mr-2 inline h-5 w-5" /> Profile
-            </Link>
-            <Link
               to="/notifications"
               className="rounded-xl px-4 py-2 text-slate-700 hover:bg-pink-50 hover:text-pink-600"
               aria-label="Notifications"
             >
               <Heart className="h-5 w-5" />
             </Link>
+            <Link
+              to="/profile"
+              className="rounded-xl px-4 py-2 text-slate-700 hover:bg-pink-50 hover:text-pink-600"
+            >
+              <User className="mr-2 inline h-5 w-5" /> Profile
+            </Link>
+            
             <button
               onClick={logout}
               className="ml-2 rounded-xl px-4 py-2 text-slate-500 hover:bg-slate-100"
