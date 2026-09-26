@@ -91,7 +91,7 @@ const Nav = () => {
             >
               <User className="mr-2 inline h-5 w-5" /> Profile
             </Link>
-            
+
             <button
               onClick={logout}
               className="ml-2 rounded-xl px-4 py-2 text-slate-500 hover:bg-slate-100"
@@ -107,13 +107,23 @@ const Nav = () => {
             </span>
           </div>
 
-          <button
-            onClick={() => setOpen(!open)}
-            className="rounded-xl p-2 text-slate-700 hover:bg-slate-100 md:hidden"
-            aria-label="Open menu"
-          >
-            {open ? <X /> : <Menu />}
-          </button>
+          <div className="flex items-center gap-1 md:hidden">
+            <Link
+              to="/notifications"
+              className="rounded-xl p-2 text-slate-700 hover:bg-pink-50 hover:text-pink-600"
+              aria-label="Notifications"
+            >
+              <Heart className="h-5 w-5" />
+            </Link>
+
+            <button
+              onClick={() => setOpen(!open)}
+              className="rounded-xl p-2 text-slate-700 hover:bg-slate-100"
+              aria-label={open ? "Close menu" : "Open menu"}
+            >
+              {open ? <X /> : <Menu />}
+            </button>
+          </div>
         </div>
 
         {open && (
